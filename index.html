@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitBazz Admin Portal - User Directory & Transformation Photos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B0F17;
+      --card-bg: #131B2A;
+      --card-hover: #1A2436;
+      --border: #24334F;
+      --primary: #22C55E;
+      --primary-light: #4ADE80;
+      --lime: #84CC16;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --danger: #EF4444;
+      --gold: #F59E0B;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #0E1420;
+      border-bottom: 1px solid var(--border);
+      padding: 1.1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #0E1218;
+      border: 2px solid var(--primary);
+      object-fit: cover;
+    }
+
+    .brand-text h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .admin-pill {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: var(--primary-light);
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1320px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Modal Overlay for Admin Login */
+    #login-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 23, 0.96);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(10px);
+    }
+
+    .login-box {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 22px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .login-box h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #FFF;
+      margin-bottom: 0.4rem;
+    }
+
+    .login-box p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.6rem;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 1.1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: #090D15;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: #FFF;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-login {
+      background: var(--primary);
+      color: #000;
+      font-weight: 800;
+      border: none;
+      border-radius: 12px;
+      padding: 0.85rem 1.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      margin-top: 0.6rem;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn-login:hover { opacity: 0.95; transform: scale(1.01); }
+
+    .error-alert {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 0.6rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    /* KPI Cards */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .kpi-card .label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .kpi-card .value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #FFF;
+      margin-top: 0.4rem;
+    }
+
+    /* Search & Dashboard Grid */
+    .dashboard-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .search-input-wrap {
+      background: #0E1420;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.65rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .search-input-wrap input {
+      background: transparent;
+      border: none;
+      color: #FFF;
+      outline: none;
+      width: 100%;
+      font-size: 0.95rem;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 960px) {
+      .grid-container { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+
+    .panel-header {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      max-height: 600px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.1rem;
+      background: #0E1522;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .user-card:hover, .user-card.active {
+      border-color: var(--primary);
+      background: var(--card-hover);
+      transform: translateX(3px);
+    }
+
+    .user-card-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #1E293B;
+      border: 2px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--primary-light);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .user-meta { flex: 1; min-width: 0; }
+    .user-meta-name { font-weight: 700; font-size: 1rem; color: #FFF; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-meta-phone { font-size: 0.85rem; color: var(--primary-light); font-weight: 600; margin-top: 2px; }
+    .user-meta-email { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Profile Detail View */
+    .profile-banner {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      background: #0E1522;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .stats-table {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-pill {
+      background: #0E1522;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 0.6rem;
+      text-align: center;
+    }
+
+    .stat-pill .name { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+    .stat-pill .val { font-size: 1rem; font-weight: 800; color: #FFF; margin-top: 2px; }
+
+    .photos-heading {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .photos-wall {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      max-height: 440px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .photo-tile {
+      background: #0E1522;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .photo-tile:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .photo-tile img {
+      width: 100%;
+      aspect-ratio: 0.85;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-tile .caption {
+      padding: 0.6rem;
+      background: #0E1522;
+    }
+
+    .photo-tile .date { font-weight: 700; font-size: 0.75rem; color: #FFF; }
+    .photo-tile .weight { color: var(--primary-light); font-size: 0.75rem; font-weight: 700; }
+    .photo-tile .notes { color: var(--text-muted); font-size: 0.65rem; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .placeholder-view {
+      text-align: center;
+      padding: 4rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ADMIN LOGIN MODAL -->
+  <div id="login-modal">
+    <div class="login-box">
+      <img src="https://res.cloudinary.com/oknbij8b/image/upload/v1790912809/file_00000000b4008207b7bfd53f2d1f93a9_wykhht.webp" style="width: 68px; height: 68px; border-radius: 18px; border: 2.5px solid var(--primary); margin-bottom: 1.25rem;" alt="FitBazz Logo">
+      <h2>FitBazz Admin Portal</h2>
+      <p>Please enter administrative email and password to manage users and view transformation photos.</p>
+
+      <div class="form-group">
+        <label>Admin Email</label>
+        <input type="email" id="input-email" placeholder="tanvirhasan252008@gmail.com" value="tanvirhasan252008@gmail.com">
+      </div>
+
+      <div class="form-group">
+        <label>Admin Password</label>
+        <input type="password" id="input-password" placeholder="th252008" value="th252008">
+      </div>
+
+      <button class="btn-login" id="btn-submit-login">Sign In as Administrator</button>
+      <div id="login-err" class="error-alert">Invalid credentials. Use tanvirhasan252008@gmail.com / th252008</div>
+    </div>
+  </div>
+
+  <!-- MAIN HEADER -->
+  <header>
+    <div class="brand">
+      <img src="https://res.cloudinary.com/oknbij8b/image/upload/v1790912809/file_00000000b4008207b7bfd53f2d1f93a9_wykhht.webp" alt="FitBazz" class="brand-logo">
+      <div class="brand-text">
+        <h1>FitBazz Administrator Portal</h1>
+        <p>User Database & Health Transformation Records</p>
+      </div>
+    </div>
+    <div class="admin-pill">
+      <span>●</span> Logged in: tanvirhasan252008@gmail.com
+    </div>
+  </header>
+
+  <!-- DASHBOARD MAIN CONTENT -->
+  <main>
+    <div class="dashboard-toolbar">
+      <div>
+        <h2 style="font-size: 1.6rem; font-weight: 800;">Registered Members & Health Journeys</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">Inspect user profiles, contact numbers, and view their body transformation progression photos.</p>
+      </div>
+      <div class="search-input-wrap">
+        <span>🔍</span>
+        <input type="text" id="user-search" placeholder="Search by name, phone or email...">
+      </div>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="label">Total App Users</div>
+        <div class="value" id="count-users">2</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Transformation Photos Uploaded</div>
+        <div class="value" id="count-photos" style="color: var(--primary-light);">5</div>
+      </div>
+      <div class="kpi-card">
+        <div class="label">Average Calorie Target</div>
+        <div class="value" id="count-calories" style="color: var(--gold);">1,975 kcal</div>
+      </div>
+    </div>
+
+    <!-- 2-COLUMN VIEW -->
+    <div class="grid-container">
+      <!-- LEFT: USER DIRECTORY -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>Registered Users</span>
+          <span id="badge-user-count" style="font-size: 0.8rem; font-weight: 700; color: var(--primary-light);">2 Members</span>
+        </div>
+
+        <div class="user-list" id="users-list-element">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- RIGHT: SELECTED USER PROFILE & TRANSFORMATION PHOTOS -->
+      <div class="panel">
+        <div class="panel-header">
+          <span>User Profile & Health Transformation Photos</span>
+        </div>
+
+        <div id="user-detail-element">
+          <div class="placeholder-view">Select a user from the directory to review their transformation journal.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const ADMIN_CREDENTIALS = {
+      email: "tanvirhasan252008@gmail.com",
+      password: "th252008"
+    };
+
+    let registeredUsers = [
+      {
+        id: "usr_tanvir_1",
+        name: "Tanvir Hasan Ahmed",
+        phoneNumber: "+8801712345678",
+        email: "tanvirhasan252008@gmail.com",
+        photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+        calorieGoal: 2150,
+        weightKg: 72.5,
+        heightCm: 178,
+        age: 26,
+        photos: [
+          { date: "2026-09-01", weightKg: 78.0, photoUrl: "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=450", notes: "Day 1 Baseline Fitness Photo" },
+          { date: "2026-09-15", weightKg: 75.2, photoUrl: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=450", notes: "Week 2 - 2.8kg weight reduction" },
+          { date: "2026-10-01", weightKg: 72.5, photoUrl: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=450", notes: "Month 1 - Notable abdominal fat loss & tone" }
+        ]
+      },
+      {
+        id: "usr_sarah_2",
+        name: "Sarah Rahman",
+        phoneNumber: "+8801898765432",
+        email: "sarah.rahman@fitmail.com",
+        photoUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+        calorieGoal: 1800,
+        weightKg: 58.0,
+        heightCm: 165,
+        age: 24,
+        photos: [
+          { date: "2026-09-10", weightKg: 62.0, photoUrl: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=450", notes: "Day 1 Journey Started" },
+          { date: "2026-09-28", weightKg: 58.0, photoUrl: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=450", notes: "Consistent calorie deficit results" }
+        ]
+      }
+    ];
+
+    let currentSelectedUserId = null;
+
+    const loginModal = document.getElementById('login-modal');
+    const btnSubmit = document.getElementById('btn-submit-login');
+    const inputEmail = document.getElementById('input-email');
+    const inputPassword = document.getElementById('input-password');
+    const loginErr = document.getElementById('login-err');
+
+    btnSubmit.addEventListener('click', () => {
+      const email = inputEmail.value.trim().toLowerCase();
+      const pass = inputPassword.value.trim();
+
+      if (email === ADMIN_CREDENTIALS.email && pass === ADMIN_CREDENTIALS.password) {
+        loginModal.style.display = 'none';
+        renderApp();
+      } else {
+        loginErr.style.display = 'block';
+      }
+    });
+
+    function renderApp(query = "") {
+      const filtered = query.trim() ? registeredUsers.filter(u => 
+        u.name.toLowerCase().includes(query.toLowerCase()) ||
+        u.phoneNumber.includes(query) ||
+        u.email.toLowerCase().includes(query.toLowerCase())
+      ) : registeredUsers;
+
+      document.getElementById('count-users').innerText = registeredUsers.length;
+      document.getElementById('badge-user-count').innerText = `${registeredUsers.length} Members`;
+
+      const totalPhotos = registeredUsers.reduce((sum, u) => sum + (u.photos ? u.photos.length : 0), 0);
+      document.getElementById('count-photos').innerText = totalPhotos;
+
+      const container = document.getElementById('users-list-element');
+      container.innerHTML = "";
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="placeholder-view">No users found matching query.</div>';
+        return;
+      }
+
+      filtered.forEach(user => {
+        const div = document.createElement('div');
+        div.className = `user-card ${currentSelectedUserId === user.id ? 'active' : ''}`;
+        div.onclick = () => selectUser(user.id);
+
+        const avatar = user.photoUrl 
+          ? `<img src="${user.photoUrl}" class="user-card-avatar" alt="${user.name}">`
+          : `<div class="user-card-avatar">${user.name.charAt(0)}</div>`;
+
+        div.innerHTML = `
+          ${avatar}
+          <div class="user-meta">
+            <div class="user-meta-name">${user.name}</div>
+            <div class="user-meta-phone">📞 ${user.phoneNumber || 'No phone'}</div>
+            <div class="user-meta-email">✉️ ${user.email || 'No email'}</div>
+          </div>
+          <div style="font-weight: 800; font-size: 0.85rem; color: var(--gold);">${user.calorieGoal} kcal</div>
+        `;
+
+        container.appendChild(div);
+      });
+
+      if (!currentSelectedUserId && filtered.length > 0) {
+        selectUser(filtered[0].id);
+      }
+    }
+
+    function selectUser(userId) {
+      currentSelectedUserId = userId;
+      const user = registeredUsers.find(u => u.id === userId);
+      if (!user) return;
+
+      document.querySelectorAll('.user-card').forEach(c => c.classList.remove('active'));
+
+      const detail = document.getElementById('user-detail-element');
+      const photos = user.photos || [];
+
+      let photosMarkup = "";
+      if (photos.length === 0) {
+        photosMarkup = '<div class="placeholder-view">User has not uploaded any transformation photos yet.</div>';
+      } else {
+        photosMarkup = `
+          <div class="photos-wall">
+            ${photos.map(p => `
+              <div class="photo-tile" onclick="window.open('${p.photoUrl}', '_blank')">
+                <img src="${p.photoUrl}" alt="Progress photo">
+                <div class="caption">
+                  <div class="date">${p.date}</div>
+                  <div class="weight">${p.weightKg ? p.weightKg + ' kg' : ''}</div>
+                  ${p.notes ? `<div class="notes">${p.notes}</div>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      detail.innerHTML = `
+        <div class="profile-banner">
+          <img src="${user.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'}" class="user-card-avatar" style="width: 60px; height: 60px;" alt="">
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 800; color: #FFF;">${user.name}</h3>
+            <p style="color: var(--primary-light); font-size: 0.9rem; font-weight: 700; margin-top: 2px;">📞 Phone: ${user.phoneNumber || 'N/A'}</p>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">✉️ Email: ${user.email || 'N/A'}</p>
+          </div>
+        </div>
+
+        <div class="stats-table">
+          <div class="stat-pill">
+            <div class="name">Weight</div>
+            <div class="val">${user.weightKg} kg</div>
+          </div>
+          <div class="stat-pill">
+            <div class="name">Height</div>
+            <div class="val">${user.heightCm} cm</div>
+          </div>
+          <div class="stat-pill">
+            <div class="name">Age</div>
+            <div class="val">${user.age} Yrs</div>
+          </div>
+          <div class="stat-pill">
+            <div class="name">Target</div>
+            <div class="val" style="color: var(--gold);">${user.calorieGoal} kcal</div>
+          </div>
+        </div>
+
+        <div class="photos-heading">
+          📸 Uploaded Transformation Photos (${photos.length})
+        </div>
+
+        ${photosMarkup}
+      `;
+    }
+
+    document.getElementById('user-search').addEventListener('input', (e) => {
+      renderApp(e.target.value);
+    });
+
+    renderApp();
+  </script>
+</body>
+</html>
